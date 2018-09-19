@@ -33,7 +33,14 @@ router.get('/:id', (req, res, next) => {
   const {id}= req.params;
 
   return Note.findById(id)
-    .then(result => res.json(result)) 
+    .then(result => {
+      if(result === null) {
+        let err = new Error('Not found');
+        err.status = 404;
+        next(err);
+      }
+      res.json(result)
+    }) 
     .catch(err => next(err));
 });
 
@@ -42,7 +49,7 @@ router.post('/', (req, res, next) => {
   const newNote = req.body;
     
   return Note.create(newNote)
-    .then(result => res.json(result))
+    .then(result => res.status(201).json(result))
     .catch(err => next(err));
 });
 
@@ -61,7 +68,7 @@ router.delete('/:id', (req, res, next) => {
   const {id} = req.params;
 
   return Note.findByIdAndRemove(id)
-    .then(result => res.json(result))
+    .then(() => res.status(204).end())
     .catch(err => next(err));
 });
 
