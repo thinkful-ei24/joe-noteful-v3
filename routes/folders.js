@@ -1,52 +1,43 @@
-'use strict';
-
 const express = require('express');
 const mongoose = require('mongoose');
-const Note = require('../models/note');
+const Folder = require('../models/folder');
 
 const router = express.Router();
 
-/* ========== GET/READ ALL ITEMS ========== */
+//GET=======================================================
+//GET all folders=============================
 router.get('/', (req, res, next) => {
-  const { searchTerm, folderId } = req.query;
-  let regSearch;
-
-  if (folderId) {
-    return Note.find({folderId: folderId})
-      .then(results => {
-        res.json(results);
-      })
-      .catch(err => next(err));
-  }
+  const { searchTerm } = req.query;
+  let regExSearch;
 
   if (searchTerm) {
-    regSearch = new RegExp(searchTerm, 'gi');
-    return Note.find({$or: [{title: regSearch}, {content: regSearch}]})
+    regExSearch = new RegExp(searchTerm, 'gi');
+    return Folder.find({$or: [{name: regExSearch}]})
       .then(results => {
         res.json(results);
       })
       .catch(err => next(err));
   }
 
-  return Note.find().sort({ updatedAt: 'desc'})
+  return Folder.find().sort({ updatedAt: 'desc'})
     .then(results => {
       res.json(results);
     })
     .catch(err => next(err));
 });
 
-/* ========== GET/READ A SINGLE ITEM ========== */
+//GET folder by id============================
 router.get('/:id', (req, res, next) => {
   const {id}= req.params;
-
+  
   if(id.length !== 24) {
     let err = new Error('Not found');
     err.status = 404;
     next(err);
   }
 
-  return Note.findById(id)
-    .then(result => {
+  return Folder.findById(id)
+    .then(result => {     
       if(result === null) {
         let err = new Error('Not found');
         err.status = 404;
@@ -57,27 +48,19 @@ router.get('/:id', (req, res, next) => {
     .catch(err => next(err));
 });
 
-/* ========== POST/CREATE AN ITEM ========== */
+//POST======================================================
 router.post('/', (req, res, next) => {
   const newNote = req.body;
-  const {folderId} = req.body;
-
-  if(folderId.length !== 24) {
-    let err = new Error('folder Id not valid');
-    err.status = 400;
-    next(err);
-  }
     
-  return Note.create(newNote)
+  return Folder.create(newNote)
     .then(result => res.status(201).json(result))
     .catch(err => next(err));
 });
 
-/* ========== PUT/UPDATE A SINGLE ITEM ========== */
+//PUT=======================================================
 router.put('/:id', (req, res, next) => {
   const {id} = req.params;
   const updateData = req.body;
-  const updateFolderId = req.body.folderId;
 
   if(id.length !== 24) {
     let err = new Error('Not found');
@@ -85,22 +68,16 @@ router.put('/:id', (req, res, next) => {
     next(err);
   }
 
-  if(updateFolderId.length !== 24) {
-    let err = new Error('folder Id not valid');
-    err.status = 400;
-    next(err);
-  }
-  
-  return Note.findByIdAndUpdate(id, updateData, {new: true})
+  return Folder.findByIdAndUpdate(id, updateData, {new: true})
     .then(result => res.json(result))
     .catch(err => next(err));
 });
 
-/* ========== DELETE/REMOVE A SINGLE ITEM ========== */
+//DELETE====================================================
 router.delete('/:id', (req, res, next) => {
   const {id} = req.params;
 
-  return Note.findByIdAndRemove(id)
+  return Folder.findByIdAndRemove(id, {$unset: {name: ''}})
     .then(() => res.status(204).end())
     .catch(err => next(err));
 });

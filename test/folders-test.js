@@ -5,21 +5,21 @@ const mongoose = require('mongoose');
 const app = require('../server');
 const { TEST_MONGODB_URI } = require('../config');
 
-const Note = require('../models/note');
+const Folder = require('../models/folder');
 
-const { notes } = require('../db/seed/notes');
+const { folders } = require('../db/seed/folders');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe('Notes testing', function() {
+describe('Folder Testing', function() {
   before(function () {
     return mongoose.connect(TEST_MONGODB_URI, { useNewUrlParser: true })
       .then(() => mongoose.connection.db.dropDatabase());
   });
 
   beforeEach(function () {
-    return Note.insertMany(notes);
+    return Folder.insertMany(folders);
   });
 
   afterEach(function () {
@@ -30,17 +30,17 @@ describe('Notes testing', function() {
     return mongoose.disconnect();
   });
 
-  //GET requests---------------------------------------------------------
-  describe('GET requests to /api/notes', function() {
-
-    it('Should return all the notes in the db', function() {
+  //GET======================================================================
+  describe('GET requests to /api/folders', function() {
+    it('Should return all the folders in the db', function() {
       let res;
-      return chai.request(app).get('/api/notes')
+
+      return chai.request(app).get('/api/folders')
         .then(function(_res) {
           res = _res;
           expect(res).to.have.status(200);
           expect(res.body).to.be.a('array');
-          return Note.count();
+          return Folder.count();
         })
         .then(function(count) {
           expect(res.body).to.have.length(count);
@@ -51,12 +51,12 @@ describe('Notes testing', function() {
     it('Should return one note when called by id', function() {
       let searchId;
 
-      return chai.request(app).get('/api/notes')
+      return chai.request(app).get('/api/folders')
         .then(function(res) {
           searchId = res.body[0].id;
         })
         .then(function() {
-          return chai.request(app).get(`/api/notes/${searchId}`);
+          return chai.request(app).get(`/api/folders/${searchId}`);
         })
         .then(function(res) {
           expect(res).to.have.status(200);
@@ -65,29 +65,27 @@ describe('Notes testing', function() {
         });
     });
   });
-  
-  //POST create a new note -------------------------------------------------------------
-  describe('POST request to /api/notes', function() {
+
+  //POST=====================================================================
+  describe('POST requests to /api/folders', function() {
     it('Create a new item, then return the item created', function() {
-      const newNote = {
-        title: 'Honey BooBoo the Second',
-        content: 'I created this by POST',
-        folderId: '111111111111111111111102'
+      const newFolder = {
+        name: 'Inserted with POST'
       };
 
       let res;
 
       return chai.request(app)
-        .post('/api/notes')
-        .send(newNote)
+        .post('/api/folders')
+        .send (newFolder)
         .then(function(_res) {
           res = _res;
           expect(res).to.have.status(201);
           expect(res).to.be.json;
           expect(res.body).to.be.a('object');
-          expect(res.body).to.have.keys('id', 'title', 'content', 'createdAt', 'updatedAt', 'folderId');
+          expect(res.body).to.have.keys('id', 'name', 'createdAt', 'updatedAt');
 
-          return Note.findById(res.body.id);
+          return Folder.findById(res.body.id);
         })
         .then(function(data) {
           expect(res.body.id).to.equal(data.id);
@@ -99,22 +97,20 @@ describe('Notes testing', function() {
     });
   });
 
-  //PUT update an item by id ------------------------------------------------------------
-  describe('PUT requests to /api/notes/:id', function() {
-    it('Update and item when selected by Id', function() {
+  //PUT======================================================================
+  describe('PUT requests to /api/folders', function() {
+    it('Update a folder when selected by Id', function() {
       const updateInfo = {
-        title: 'Honey Boo Boo',
-        content: 'Testing now',
-        folderId: '111111111111111111111102'
+        name: 'Updated with PUT'
       };
       let searchId;
       let res;
 
       return chai.request(app)
-        .get('/api/notes')
+        .get('/api/folders')
         .then(function(_res) {
           searchId = _res.body[0].id;
-          return chai.request(app).put(`/api/notes/${searchId}`)
+          return chai.request(app).put(`/api/folders/${searchId}`)
             .send(updateInfo)
             .then(function(_res) {
               res = _res;
@@ -122,33 +118,32 @@ describe('Notes testing', function() {
               expect(res.body).to.be.a('object');
               expect(res.body.id).to.equal(searchId);
 
-              return Note.findById(searchId);
+              return Folder.findById(searchId);
             })
             .then(function(data) {
               expect(res.body.id).to.equal(data.id);
               expect(updateInfo.title).to.equal(data.title);
-              expect(res.body.folderId).to.have.lengthOf(24);
             });
         });
     });
   });
 
-  //DELETE erase an item  ------------------------------------------------------
-  describe('DELETE to api/notes/:id', function() {
-
-    it('Deletes an item when picked by id', function() {
+  //DELETE===================================================================
+  describe('DELETE requests to /api/folders', function() {
+    it('Deletes a folder when picked by id', function() {
       let searchId;
 
       return chai.request(app)
-        .get('/api/notes')
+        .get('/api/folders')
         .then(function(res) {
           searchId = res.body[0].id;
-          return chai.request(app).del(`/api/notes/${searchId}`);
+          return chai.request(app).del(`/api/folders/${searchId}`);
         })
         .then(function(data) {
           expect(data).to.have.status(204);
-          expect(Note.findById(searchId).body).to.be.undefined;
+          expect(Folder.findById(searchId).body).to.be.undefined;
         });
     });
   });
+
 });
