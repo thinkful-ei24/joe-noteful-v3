@@ -12,7 +12,7 @@ const { notes } = require('../db/seed/notes');
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe.only('Notes testing', function() {
+describe('Notes testing', function() {
   before(function () {
     return mongoose.connect(TEST_MONGODB_URI)
       .then(() => mongoose.connection.db.dropDatabase());
