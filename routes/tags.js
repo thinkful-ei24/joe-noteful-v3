@@ -75,7 +75,7 @@ router.put('/:id', function(req, res, next) {
 router.delete('/:id', function(req, res, next) {
   const { id } = req.params;
 
-  return Tag.findByIdAndRemove(id)
+  return Tag.findByIdAndRemove(id, {$pull: {tagId: id}})
     .then(() => res.status(204).end())
     .catch(err => next(err));
 });

@@ -20,7 +20,7 @@ router.get('/', (req, res, next) => {
   }
 
   if (tagId) {
-    return Note.find({tags: [tagId]})
+    return Note.find({tagId: [tagId]})
       .then(results => {
         res.json(results);
       })
