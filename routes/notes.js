@@ -8,11 +8,19 @@ const router = express.Router();
 
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
-  const { searchTerm, folderId } = req.query;
+  const { searchTerm, folderId, tagId} = req.query;
   let regSearch;
 
   if (folderId) {
     return Note.find({folderId: folderId})
+      .then(results => {
+        res.json(results);
+      })
+      .catch(err => next(err));
+  }
+
+  if (tagId) {
+    return Note.find({tags: [tagId]})
       .then(results => {
         res.json(results);
       })
@@ -60,9 +68,15 @@ router.get('/:id', (req, res, next) => {
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
   const newNote = req.body;
-  const {folderId} = req.body;
+  const { folderId, tagId } = req.body;
 
   if(folderId.length !== 24) {
+    let err = new Error('folder Id not valid');
+    err.status = 400;
+    next(err);
+  }
+
+  if(tagId.length !== 24) {
     let err = new Error('folder Id not valid');
     err.status = 400;
     next(err);
@@ -77,7 +91,7 @@ router.post('/', (req, res, next) => {
 router.put('/:id', (req, res, next) => {
   const {id} = req.params;
   const updateData = req.body;
-  const updateFolderId = req.body.folderId;
+  const { folderId, tagId } = req.body;
 
   if(id.length !== 24) {
     let err = new Error('Not found');
@@ -85,8 +99,14 @@ router.put('/:id', (req, res, next) => {
     next(err);
   }
 
-  if(updateFolderId.length !== 24) {
+  if(folderId.length !== 24) {
     let err = new Error('folder Id not valid');
+    err.status = 400;
+    next(err);
+  }
+
+  if(tagId.length !== 24) {
+    let err = new Error('tag Id not valid');
     err.status = 400;
     next(err);
   }

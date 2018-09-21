@@ -75,9 +75,9 @@ router.put('/:id', (req, res, next) => {
 
 //DELETE====================================================
 router.delete('/:id', (req, res, next) => {
-  const {id} = req.params;
+  const {id} = req.params;    
 
-  return Folder.findByIdAndRemove(id, {$unset: {name: ''}})
+  return Folder.findByIdAndRemove(id, {$pull: {tags: [id]}})
     .then(() => res.status(204).end())
     .catch(err => next(err));
 });
