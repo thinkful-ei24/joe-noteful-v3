@@ -72,7 +72,8 @@ describe('Notes testing', function() {
       const newNote = {
         title: 'Honey BooBoo the Second',
         content: 'I created this by POST',
-        folderId: '111111111111111111111102'
+        folderId: '111111111111111111111102',
+        tagId: '222222222222222222222202'
       };
 
       let res;
@@ -85,7 +86,7 @@ describe('Notes testing', function() {
           expect(res).to.have.status(201);
           expect(res).to.be.json;
           expect(res.body).to.be.a('object');
-          expect(res.body).to.have.keys('id', 'title', 'content', 'createdAt', 'updatedAt', 'folderId');
+          expect(res.body).to.have.keys('id', 'title', 'content', 'createdAt', 'updatedAt', 'folderId', 'tags');
 
           return Note.findById(res.body.id);
         })
@@ -105,7 +106,8 @@ describe('Notes testing', function() {
       const updateInfo = {
         title: 'Honey Boo Boo',
         content: 'Testing now',
-        folderId: '111111111111111111111102'
+        folderId: '111111111111111111111102',
+        tagId: '222222222222222222222202'
       };
       let searchId;
       let res;

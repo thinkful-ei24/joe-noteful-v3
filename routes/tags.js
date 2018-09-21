@@ -1,5 +1,6 @@
-const express = require('express)');
-const Tag = require('../models/note');
+const express = require('express');
+const mongoose = require('mongoose');
+const Tag = require('../models/tag');
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ router.post('/', function(req, res, next) {
   const newTag = req.body;
 
   return Tag.create(newTag)
-    .then(result => res.json(result))
+    .then(result => res.status(201).json(result))
     .catch(err => next(err));
 });
 
@@ -71,7 +72,7 @@ router.put('/:id', function(req, res, next) {
 });
 
 //DELETE=====================================================
-router.del('/:id', function(req, res, next) {
+router.delete('/:id', function(req, res, next) {
   const { id } = req.params;
 
   return Tag.findByIdAndRemove(id)

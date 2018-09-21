@@ -5,21 +5,21 @@ const mongoose = require('mongoose');
 const app = require('../server');
 const { TEST_MONGODB_URI } = require('../config');
 
-const Folder = require('../models/folder');
+const Tag = require('../models/tag');
 
-const { folders } = require('../db/seed/folders');
+const { tags } = require('../db/seed/tags');
 
 const expect = chai.expect;
 chai.use(chaiHttp);
 
-describe('Folder Testing', function() {
+describe('Tags Testing', function() {
   before(function () {
     return mongoose.connect(TEST_MONGODB_URI, { useNewUrlParser: true })
       .then(() => mongoose.connection.db.dropDatabase());
   });
 
   beforeEach(function () {
-    return Folder.insertMany(folders);
+    return Tag.insertMany(tags);
   });
 
   afterEach(function () {
@@ -31,16 +31,16 @@ describe('Folder Testing', function() {
   });
 
   //GET======================================================================
-  describe('GET requests to /api/folders', function() {
-    it('Should return all the folders in the db', function() {
+  describe('GET requests to /api/tags', function() {
+    it('Should return all the tags in the db', function() {
       let res;
 
-      return chai.request(app).get('/api/folders')
+      return chai.request(app).get('/api/tags')
         .then(function(_res) {
           res = _res;
           expect(res).to.have.status(200);
           expect(res.body).to.be.a('array');
-          return Folder.count();
+          return Tag.count();
         })
         .then(function(count) {
           expect(res.body).to.have.length(count);
@@ -48,15 +48,15 @@ describe('Folder Testing', function() {
         });
     });
 
-    it('Should return one folder when called by id', function() {
+    it('Should return one tag when called by id', function() {
       let searchId;
 
-      return chai.request(app).get('/api/folders')
+      return chai.request(app).get('/api/tags')
         .then(function(res) {
           searchId = res.body[0].id;
         })
         .then(function() {
-          return chai.request(app).get(`/api/folders/${searchId}`);
+          return chai.request(app).get(`/api/tags/${searchId}`);
         })
         .then(function(res) {
           expect(res).to.have.status(200);
@@ -67,17 +67,17 @@ describe('Folder Testing', function() {
   });
 
   //POST=====================================================================
-  describe('POST requests to /api/folders', function() {
-    it('Create a new item, then return the item created', function() {
-      const newFolder = {
-        name: 'Inserted with POST'
+  describe('POST requests to /api/tags', function() {
+    it('Create a new tag, then return the tag created', function() {
+      const newTag = {
+        name: 'Tag made with POST'
       };
 
       let res;
 
       return chai.request(app)
-        .post('/api/folders')
-        .send (newFolder)
+        .post('/api/tags')
+        .send (newTag)
         .then(function(_res) {
           res = _res;
           expect(res).to.have.status(201);
@@ -85,7 +85,7 @@ describe('Folder Testing', function() {
           expect(res.body).to.be.a('object');
           expect(res.body).to.have.keys('id', 'name', 'createdAt', 'updatedAt');
 
-          return Folder.findById(res.body.id);
+          return Tag.findById(res.body.id);
         })
         .then(function(data) {
           expect(res.body.id).to.equal(data.id);
@@ -98,8 +98,8 @@ describe('Folder Testing', function() {
   });
 
   //PUT======================================================================
-  describe('PUT requests to /api/folders', function() {
-    it('Update a folder when selected by Id', function() {
+  describe('PUT requests to /api/tags', function() {
+    it('Update a tag when selected by Id', function() {
       const updateInfo = {
         name: 'Updated with PUT'
       };
@@ -107,10 +107,10 @@ describe('Folder Testing', function() {
       let res;
 
       return chai.request(app)
-        .get('/api/folders')
+        .get('/api/tags')
         .then(function(_res) {
           searchId = _res.body[0].id;
-          return chai.request(app).put(`/api/folders/${searchId}`)
+          return chai.request(app).put(`/api/tags/${searchId}`)
             .send(updateInfo)
             .then(function(_res) {
               res = _res;
@@ -118,30 +118,30 @@ describe('Folder Testing', function() {
               expect(res.body).to.be.a('object');
               expect(res.body.id).to.equal(searchId);
 
-              return Folder.findById(searchId);
+              return Tag.findById(searchId);
             })
             .then(function(data) {
               expect(res.body.id).to.equal(data.id);
-              expect(updateInfo.title).to.equal(data.title);
+              expect(updateInfo.name).to.equal(data.name);
             });
         });
     });
   });
 
   //DELETE===================================================================
-  describe('DELETE requests to /api/folders', function() {
-    it('Deletes a folder when picked by id', function() {
+  describe('DELETE requests to /api/tags', function() {
+    it('Deletes a tag when picked by id', function() {
       let searchId;
 
       return chai.request(app)
-        .get('/api/folders')
+        .get('/api/tags')
         .then(function(res) {
           searchId = res.body[0].id;
-          return chai.request(app).del(`/api/folders/${searchId}`);
+          return chai.request(app).del(`/api/tags/${searchId}`);
         })
         .then(function(data) {
           expect(data).to.have.status(204);
-          expect(Folder.findById(searchId).body).to.be.undefined;
+          expect(Tag.findById(searchId).body).to.be.undefined;
         });
     });
   });
